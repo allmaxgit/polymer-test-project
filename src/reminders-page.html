@@ -1,0 +1,89 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-input/iron-input.html">
+<link rel="import" href="../bower_components/iron-autogrow-textarea/iron-autogrow-textarea.html">
+<link rel="import" href="../bower_components/vaadin-date-picker/vaadin-date-picker.html">
+<link rel="import" href="../bower_components/paper-datatable/paper-datatable.html">
+
+<dom-module id="reminders-page">
+  <template>
+    <paper-datatable data="{{reminders}}">
+      <paper-datatable-column header="Title" property="title" sortable>
+      </paper-datatable-column>
+      <paper-datatable-column header="Description" property="description">
+      </paper-datatable-column>
+      <paper-datatable-column header="Date" property="date">
+      </paper-datatable-column>
+      <paper-datatable-column header="Actions">
+        <template>
+          <button class="remove-butt" on-click="remove">remove</button>
+        </template>
+      </paper-datatable-column>
+    </paper-datatable>
+    <table class='add'>
+      <tbody>
+        <tr>
+          <td> Title</td>
+          <td><input is="iron-input" bind-value="{{title}}" /></td>
+        </tr>
+        <tr>
+          <td> Description</td>
+          <td>
+            <iron-autogrow-textarea bind-value="{{description}}"></iron-autogrow-textarea>
+          </td>
+        </tr>
+        <tr>
+          <td> Date</td>
+          <td>
+            <vaadin-date-picker min="{{minDate}}" value="{{date}}"></vaadin-date-picker>
+          </td>
+        </tr>
+        <tr>
+          <td><button on-click="add">Save</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </template>
+
+  <script>
+    const nowDate = () => {
+      const date = new Date();
+      return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+    }
+    const dataString = (date) => {
+      const els = date.split('-');
+      return `${els[1]}/${els[2]}/${els[0]}`;
+    }
+    Polymer({
+      is: 'reminders-page',
+
+      properties: {
+        user: String,
+      },
+      ready() {
+        const reminders = localStorage.getItem("reminders");
+        this.reminders = reminders ? JSON.parse(reminders) : [];
+        const date = new Date();
+        this.date = nowDate();
+        this.minDate = this.date;
+        this.user = 'asd'
+      },
+      add() {
+        this.push('reminders', {
+          title: this.title,
+          description: this.description,
+          date: dataString(this.date)
+        });
+        localStorage.setItem("reminders", JSON.stringify(this.reminders));
+
+        this.title = '';
+        this.description = '';
+        this.date = nowDate();
+        this.minDate = this.date;
+      },
+      remove(e) {
+        this.splice('reminders', e.model.__data__.index, 1);
+        localStorage.setItem("reminders", JSON.stringify(this.reminders));
+      }
+    });
+  </script>
+</dom-module>
